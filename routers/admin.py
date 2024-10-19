@@ -31,6 +31,8 @@ class Update_role(BaseModel):
     role: str
 
 
+
+# admin can see all users
 @router.get("/all_users", status_code=status.HTTP_200_OK)
 async def get_all_users(user: user_dependency, db: db_dependency):
     if user is None or user.get("role") != "admin":

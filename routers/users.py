@@ -65,6 +65,7 @@ async def change_password(user: user_dependency, db: db_dependency, user_verific
     db.commit()
 
 
+# update user info
 
 @router.put("/change_info", status_code=status.HTTP_200_OK)
 async def update_user(user: user_dependency, db: db_dependency, update_user: UpdateUser):

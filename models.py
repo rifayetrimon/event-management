@@ -26,7 +26,7 @@ class Event(Base):
     description = Column(String)
     category = Column(String)
     venue = Column(String)
-    statdate = Column(DateTime)
+    startdate = Column(DateTime)
     enddate = Column(DateTime)
     maxcapacity = Column(Integer)
     organizer = Column(ForeignKey("users.id"))
