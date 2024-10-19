@@ -6,6 +6,7 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 from models import Event
 from .auth import get_current_user
+from passlib.context import CryptContext
 
 
 router = APIRouter(
@@ -23,7 +24,6 @@ class CreateEventRequest(BaseModel):
     statdate: datetime
     enddate: datetime
     maxcapacity: int
-    # organizer: int
     isprivate: bool
 
 
@@ -36,13 +36,13 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
-user_dependency = Annotated[dict, Depends(get_current_user)]    
-
+user_dependency = Annotated[dict, Depends(get_current_user)]
+bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 
 @router.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_event(event: CreateEventRequest, db: db_dependency, user: user_dependency):
+async def create_event(user: user_dependency, db: db_dependency, event: CreateEventRequest):
     if user is None or user.get("role") != "admin" or user.get("role") != "organizer":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     
@@ -59,6 +59,7 @@ async def create_event(event: CreateEventRequest, db: db_dependency, user: user_
         organizer=organizer,
         isprivate=event.isprivate
     )
+
     db.add(create_event)
     db.commit()
     db.refresh(create_event)
