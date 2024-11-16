@@ -4,6 +4,7 @@ from database import engine
 from routers import auth, users, admin, event, ticket, registration
 import uvicorn
 import logging
+import os
 
 
 app = FastAPI()
@@ -39,5 +40,9 @@ app.include_router(registration.router)
 
 
 
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="127.0.0.1", port=8000)
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    port = os.getenv("PORT", 8000)  # Use PORT environment variable or default to 8000
+    uvicorn.run(app, host="0.0.0.0", port=int(port))
