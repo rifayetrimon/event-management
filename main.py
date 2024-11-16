@@ -44,5 +44,4 @@ app.include_router(registration.router)
 #     uvicorn.run(app, host="127.0.0.1", port=8000)
 
 if __name__ == "__main__":
-    port = os.getenv("PORT", 8000)  # Use PORT environment variable or default to 8000
-    uvicorn.run(app, host="0.0.0.0", port=int(port))
+    uvicorn.run(app, host="0.0.0.0", port=int(10000))
