@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from models import Event, Users
 from .auth import get_current_user
 from passlib.context import CryptContext
+from enum import Enum
 
 
 router = APIRouter(
@@ -16,15 +17,23 @@ router = APIRouter(
 
 
 
+class Category(str, Enum):
+    conferences = "conferences"
+    webinars = "webinars"
+    concert = "concert"
+
+
+
 class CreateEventRequest(BaseModel):
     title: str
     description: str
-    category: str
+    category: Category
     venue: str
     startdate: datetime
     enddate: datetime
     maxcapacity: int
     isprivate: bool
+
 
 
 class UpdateEventRequest(BaseModel):
@@ -87,15 +96,11 @@ async def create_event(user: user_dependency, db: db_dependency ,event: CreateEv
 # view event  if viewer is admin can see all if organizer can see only his
 
 @router.get("/view_event", status_code=status.HTTP_200_OK)
-async def view_event(user: user_dependency, db: db_dependency):
-    if user.get("role") == 'admin':
-        events = db.query(Event).all()
-        return events
-    elif user.get("role") == 'organizer':
-        events = db.query(Event).filter(Event.organizer == user.get("id")).all()
-        return events
-    else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+async def view_event(db: db_dependency):
+    
+    events = db.query(Event).all()
+    return events
+    
     
 
 
@@ -149,6 +154,8 @@ async def update_event(user: user_dependency, db: db_dependency, event: UpdateEv
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
 
+
+
 # admin can delete any event but organizer can only delete his event
 
 @router.delete("/delete_event", status_code=status.HTTP_200_OK)
@@ -162,11 +169,11 @@ async def delete_event(user: user_dependency, db: db_dependency, event_id: int):
 
         db.delete(event_model)
         db.commit()
-        db.refresh(event_model)
 
         return {"message": "event deleted successfully"}
-
+    
     elif user.get("role") == 'organizer':
+        
         event_model = db.query(Event).filter(Event.organizer == user.get("id")).first()
 
         if not event_model:
@@ -174,7 +181,8 @@ async def delete_event(user: user_dependency, db: db_dependency, event_id: int):
 
         db.delete(event_model)
         db.commit()
-        db.refresh(event_model)
 
+        return {"message": "event deleted successfully"}
+    
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")

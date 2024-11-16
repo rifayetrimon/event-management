@@ -109,7 +109,7 @@ async def update_user(user: user_dependency, db: db_dependency, update_user: Upd
 
 # delete user 
     
-@router.delete("/", status_code=status.HTTP_200_OK)
+@router.delete("/delete", status_code=status.HTTP_200_OK)
 async def delete_user(user: user_dependency, db: db_dependency):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")

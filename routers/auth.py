@@ -1,6 +1,6 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, status, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from models import Users
 from typing import Optional, Annotated
 from sqlalchemy.orm import Session
@@ -82,7 +82,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
 
 class CreateUserRequest(BaseModel):
     name: str
-    email: str
+    email: str = Field(unique=True)
     password: str
     role: Optional[str] = None 
     phone_number: str
@@ -115,6 +115,12 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 @router.post("/signup", status_code= status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user: CreateUserRequest):
+
+    existing_user = db.query(Users).filter(Users.email == create_user.email).first()
+    
+    if existing_user:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists")
+
     crete_user_model = Users(
         name = create_user.name,
         email = create_user.email,
@@ -125,6 +131,8 @@ async def create_user(db: db_dependency, create_user: CreateUserRequest):
     
     db.add(crete_user_model)
     db.commit()
+    
+    return {"message": "User created successfully"}
     
 
 

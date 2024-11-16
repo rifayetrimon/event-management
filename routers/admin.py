@@ -14,7 +14,6 @@ router = APIRouter(
     tags=["admin"],
 )
 
-
 def get_db():
     db = SessionLocal()
     try:
