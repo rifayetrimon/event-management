@@ -48,7 +48,7 @@ def authenticate_user(email: str, password: str, db):
     return user
 
 
-# create user access token 
+# create user access tokenn 
 
 def create_access_token(name: str, user_id: int, role: str, expires_delta: timedelta):
     encode = {"sub": name, "id": user_id, "role": role}
